@@ -2,7 +2,7 @@ const Host = require("../models/Host");
 
 const isHost = async (req, res, next) => {
   const token = req.headers.authorization.replace("Bearer ", "");
-  const hostFound = await Author.findOne({ token });
+  const hostFound = await Host.findOne({ token });
   if (hostFound) {
     req.hostFound = hostFound;
     next();

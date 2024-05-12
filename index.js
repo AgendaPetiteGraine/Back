@@ -9,10 +9,12 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URL + "PetiteGraine");
 
 const hostRoutes = require("./routes/host");
+const adminRoutes = require("./routes/admin");
 const eventRoutes = require("./routes/event");
 const mailRoutes = require("./routes/mail");
 
 app.use(hostRoutes);
+app.use(adminRoutes);
 app.use(eventRoutes);
 app.use(mailRoutes);
 
