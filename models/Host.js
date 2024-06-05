@@ -12,6 +12,7 @@ const Host = mongoose.model("Host", {
   phone: String,
   contact: String,
   website: String,
+  facebook: String,
   last_connexion: Date,
   events: [
     {

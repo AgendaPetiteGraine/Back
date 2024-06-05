@@ -12,11 +12,13 @@ const hostRoutes = require("./routes/host");
 const adminRoutes = require("./routes/admin");
 const eventRoutes = require("./routes/event");
 const mailRoutes = require("./routes/mail");
+const googleRoutes = require("./routes/google");
 
 app.use(hostRoutes);
 app.use(adminRoutes);
 app.use(eventRoutes);
 app.use(mailRoutes);
+app.use(googleRoutes);
 
 app.get("/", (req, res) => {
   try {

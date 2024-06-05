@@ -9,10 +9,30 @@ const uid2 = require("uid2");
 const encBase64 = require("crypto-js/enc-base64");
 const SHA256 = require("crypto-js/sha256");
 
+const formData = require("form-data");
+const Mailgun = require("mailgun.js");
+const { events } = require("../models/Host");
+const mailgun = new Mailgun(formData);
+
+const client = mailgun.client({
+  username: "Sophie Boyer",
+  key: process.env.API_KEY_MAILGUN,
+});
+
 // Route pour se créer un compte /host/signup
 router.post("/host/signup", async (req, res) => {
   try {
-    const { email, name, city, phone, contact, website, password } = req.body;
+    const {
+      email,
+      name,
+      city,
+      phone,
+      contact,
+      website,
+      facebook,
+      password,
+      key,
+    } = req.body;
     const emailAlreadyUsed = await Host.findOne({
       email: email,
     });
@@ -23,6 +43,11 @@ router.post("/host/signup", async (req, res) => {
       return res
         .status(400)
         .json({ message: "Adresse email déjà existante 🙀" });
+    }
+    if (key !== process.env.KEY) {
+      return res
+        .status(400)
+        .json({ message: "Clé de validation incorrecte 🙀" });
     }
     const status = "en attente de validation";
     const last_connexion = new Date();
@@ -39,10 +64,22 @@ router.post("/host/signup", async (req, res) => {
       phone,
       contact,
       website,
+      facebook,
       last_connexion,
     });
     console.log(`Nouvel organisateur ${newHost.name} créé 👏`);
     await newHost.save();
+    // m'envoyer un mail pour me mettre au courant...
+    const messageData = {
+      from: `contact@petitegraine.org`,
+      to: process.env.MY_EMAIL,
+      subject: `Nouvel organisateur`,
+      text: `${name} vient de se créer un compte sur l'agenda Petite Graine`,
+    };
+    const response = await client.messages.create(
+      process.env.DOMAIN_MAILGUN,
+      messageData
+    );
     return res.status(200).json({
       _id: newHost._id,
       token: token,
@@ -152,7 +189,10 @@ router.post("/host/update", isHost, async (req, res) => {
 // Route pour récupérer les infos d'un organisateur /host/account
 router.get("/host/account", isHost, async (req, res) => {
   try {
-    return req.hostFound;
+    const host = await Host.findById(req.hostFound._id).populate({
+      path: "events",
+    });
+    return res.status(200).json(host);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
