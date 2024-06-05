@@ -95,6 +95,9 @@ router.post("/host/signin", async (req, res) => {
     const host = await Host.findOne({
       email: req.body.email,
     });
+    if (!host) {
+      return res.status(401).json({ message: "Adresse email incorrecte 😾" });
+    }
     const hashLogin = SHA256(req.body.password + host.salt).toString(encBase64);
     if (hashLogin === host.hash) {
       const response = {

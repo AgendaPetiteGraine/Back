@@ -134,7 +134,7 @@ router.get("/event/:id", async (req, res) => {
       path: "host",
       select: "name",
     });
-    return event;
+    return res.status(200).json(event);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -223,7 +223,7 @@ router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
 router.get("/events", async (req, res) => {
   try {
     const events = await Event.find();
-    return events;
+    return res.status(200).json(events);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
