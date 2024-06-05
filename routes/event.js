@@ -58,6 +58,7 @@ router.post("/event/create", isHost, fileUpload(), async (req, res) => {
     if (bookingRequired === "true") {
       booleanBookingRequired = true;
     }
+    const formattedDate = new Date(date);
     let nbAgeMin = 0;
     let nbAgeMax = 0;
     const keyWordsTab = [];
@@ -75,7 +76,7 @@ router.post("/event/create", isHost, fileUpload(), async (req, res) => {
       title,
       type,
       keyWords: keyWordsTab,
-      date,
+      date: formattedDate,
       timeStart,
       timeEnd,
       ageMin: nbAgeMin,
@@ -98,15 +99,22 @@ router.post("/event/create", isHost, fileUpload(), async (req, res) => {
     if (req.files) {
       const picturesToUpload = req.files.pictures;
       const pictures = [];
-      for (let p = 0; p < picturesToUpload.length; p++) {
-        const picture = picturesToUpload[p];
+      if (picturesToUpload.length) {
+        for (let p = 0; p < picturesToUpload.length; p++) {
+          const picture = picturesToUpload[p];
+          const result = await cloudinary.uploader.upload(
+            convertToBase64(picture),
+            { folder: `/petitegraine/events/${hostFound._id}` }
+          );
+          pictures.push(result.secure_url);
+        }
+      } else {
         const result = await cloudinary.uploader.upload(
-          convertToBase64(picture),
+          convertToBase64(picturesToUpload),
           { folder: `/petitegraine/events/${hostFound._id}` }
         );
         pictures.push(result.secure_url);
       }
-
       newEvent.pictures = pictures;
       await newEvent.save();
     }
@@ -121,6 +129,17 @@ router.post("/event/create", isHost, fileUpload(), async (req, res) => {
       process.env.DOMAIN_MAILGUN,
       messageData
     );
+    const events = [...hostFound.events];
+    console.log(events);
+    events.push({ _id: newEvent._id });
+    const hostToUpdate = await Host.findByIdAndUpdate(
+      hostFound._id,
+      {
+        events,
+      },
+      { new: true }
+    );
+    await hostToUpdate.save();
     return res.status(200).json(newEvent);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -143,11 +162,12 @@ router.get("/event/:id", async (req, res) => {
 // Route pour modifier un événement /event/update
 router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
   try {
+    const hostFound = req.hostFound;
     const eventId = req.params.id;
     const {
       title,
       type,
-      kewWords,
+      keyWords,
       date,
       timeStart,
       timeEnd,
@@ -155,24 +175,57 @@ router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
       ageMax,
       areBabyAccepted,
       place,
+      address,
       city,
       price,
       description,
-      pictures,
       video,
       website,
       ticketing,
       status,
+      currentPictures,
+      bookingRequired,
+      bookingSpecifications,
     } = req.body;
+    let booleanAreBabyAccepted = false;
+    let booleanBookingRequired = false;
+    if (areBabyAccepted === "true") {
+      booleanAreBabyAccepted = true;
+    }
+    if (bookingRequired === "true") {
+      booleanBookingRequired = true;
+    }
+    const formattedDate = new Date(date);
+    let nbAgeMin = 0;
+    let nbAgeMax = 0;
+    const keyWordsTab = [];
+    if (ageMin) {
+      nbAgeMin = parseInt(ageMin);
+    }
+    if (ageMax) {
+      nbAgeMin = parseInt(ageMax);
+    }
+    if (keyWords) {
+      keyWords.split(" ").map((word) => keyWordsTab.push(word));
+    }
+    const pictures = [...currentPictures];
     if (req.files) {
-      if (req.files.pictures) {
-        for (let p = 0; p < req.files.pictures.length; p++) {
+      const picturesToUpload = req.files.pictures;
+      if (picturesToUpload.length) {
+        for (let p = 0; p < picturesToUpload.length; p++) {
+          const picture = picturesToUpload[p];
           const result = await cloudinary.uploader.upload(
-            convertToBase64(req.files.pictures[p]),
-            { folder: `/entrauteurs/banners` }
+            convertToBase64(picture),
+            { folder: `/petitegraine/events/${hostFound._id}` }
           );
           pictures.push(result.secure_url);
         }
+      } else {
+        const result = await cloudinary.uploader.upload(
+          convertToBase64(picturesToUpload),
+          { folder: `/petitegraine/events/${hostFound._id}` }
+        );
+        pictures.push(result.secure_url);
       }
     }
     const eventToUpdate = await Event.findByIdAndUpdate(
@@ -181,14 +234,15 @@ router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
         host: req.hostFound._id,
         title,
         type,
-        kewWords,
-        date,
+        keyWords: keyWordsTab,
+        date: formattedDate,
         timeStart,
         timeEnd,
-        ageMin,
-        ageMax,
-        areBabyAccepted,
+        ageMin: nbAgeMin,
+        ageMax: nbAgeMax,
+        areBabyAccepted: booleanAreBabyAccepted,
         place,
+        address,
         city,
         price,
         description,
@@ -196,12 +250,14 @@ router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
         video,
         website,
         ticketing,
+        bookingRequired: booleanBookingRequired,
+        bookingSpecifications,
         status,
       },
       { new: true }
     );
     await eventToUpdate.save();
-    console.log(`Événement modifié ${newEvent.title} 👏`);
+    console.log(`Événement modifié ${eventToUpdate.title} 👏`);
     // m'envoyer un mail pour me mettre au courant...
     const messageData = {
       from: `contact@petitegraine.org`,
@@ -213,7 +269,7 @@ router.post("/event/update/:id", isHost, fileUpload(), async (req, res) => {
       process.env.DOMAIN_MAILGUN,
       messageData
     );
-    return res.status(200).json(newEvent);
+    return res.status(200).json(eventToUpdate);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
