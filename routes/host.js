@@ -181,7 +181,7 @@ router.post("/host/update", isHost, async (req, res) => {
     );
     await hostToUpdate.save();
     return res.status(200).json({
-      _id: newHost._id,
+      _id: hostToUpdate._id,
       token: token,
     });
   } catch (error) {
@@ -194,6 +194,7 @@ router.get("/host/account", isHost, async (req, res) => {
   try {
     const host = await Host.findById(req.hostFound._id).populate({
       path: "events",
+      options: { sort: { date: 1 } }, // 1 pour un tri croissant (ascendant), -1 pour un tri décroissant (descendant)
     });
     return res.status(200).json(host);
   } catch (error) {

@@ -26,4 +26,9 @@ router.get("/googlePlace", isHost, async (req, res) => {
   }
 });
 
+// retourner l'API key Google
+router.get("/g3t0Gg!APIk3y", (req, res) => {
+  return res.status(200).json(process.env.GOOGLE_API_KEY);
+});
+
 module.exports = router;

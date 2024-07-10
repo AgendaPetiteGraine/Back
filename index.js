@@ -11,12 +11,14 @@ mongoose.connect(process.env.MONGODB_URL + "PetiteGraine");
 const hostRoutes = require("./routes/host");
 const adminRoutes = require("./routes/admin");
 const eventRoutes = require("./routes/event");
+const placeRoutes = require("./routes/place");
 const mailRoutes = require("./routes/mail");
 const googleRoutes = require("./routes/google");
 
 app.use(hostRoutes);
 app.use(adminRoutes);
 app.use(eventRoutes);
+app.use(placeRoutes);
 app.use(mailRoutes);
 app.use(googleRoutes);
 
