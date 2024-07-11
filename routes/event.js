@@ -534,6 +534,16 @@ router.post("/event/favorites/:id", async (req, res) => {
   }
 });
 
+// Route pour récupérer tous les id d'events /eventsId
+router.get("/eventsId", async (req, res) => {
+  try {
+    const events = await Event.find().select("_id");
+    return res.status(200).json({ events });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Route pour récupérer tous les événements selon filtres /events
 router.get("/events", async (req, res) => {
   try {
