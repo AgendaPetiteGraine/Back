@@ -14,6 +14,7 @@ const eventRoutes = require("./routes/event");
 const placeRoutes = require("./routes/place");
 const mailRoutes = require("./routes/mail");
 const googleRoutes = require("./routes/google");
+const amplitudeRoutes = require("./routes/amplitude");
 
 app.use(hostRoutes);
 app.use(adminRoutes);
@@ -21,6 +22,7 @@ app.use(eventRoutes);
 app.use(placeRoutes);
 app.use(mailRoutes);
 app.use(googleRoutes);
+app.use(amplitudeRoutes);
 
 app.get("/", (req, res) => {
   try {
