@@ -202,4 +202,16 @@ router.get("/host/account", isHost, async (req, res) => {
   }
 });
 
+// Route pour récupérer les infos d'un organisateur /host/account
+router.get("/hosts", async (req, res) => {
+  try {
+    const host = await Host.find()
+      .select("name city website")
+      .sort({ city: 1 });
+    return res.status(200).json(host);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
