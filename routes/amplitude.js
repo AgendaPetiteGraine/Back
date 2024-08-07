@@ -1,3 +1,4 @@
+const express = require("express");
 const router = express.Router();
 
 // retourner l'API key Amplitude
