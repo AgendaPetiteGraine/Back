@@ -104,12 +104,18 @@ router.post("/event/create", isHostChecked, fileUpload(), async (req, res) => {
     const response1 = await fetch(url);
     const data = await response1.json();
     const location = {};
+    const count = data.results.length;
     data.results.map((result) => {
       if (result.place_id === place_id) {
+        count--;
         location.lat = result.geometry.location.lat;
         location.lng = result.geometry.location.lng;
       }
     });
+    if (count === data.results.length) {
+      location.lat = results[0].geometry.location.lat;
+      location.lng = results[0].geometry.location.lng;
+    }
     const placeFound = await Place.findOne({ address });
     // vérifier si la place existe dans la BDD, si non -> l'ajouter, si oui -> vérifier que l'accès soit le même ou update
     if (placeFound) {
