@@ -113,8 +113,8 @@ router.post("/event/create", isHostChecked, fileUpload(), async (req, res) => {
       }
     });
     if (count === data.results.length) {
-      location.lat = results[0].geometry.location.lat;
-      location.lng = results[0].geometry.location.lng;
+      location.lat = data.results[0].geometry.location.lat;
+      location.lng = data.results[0].geometry.location.lng;
     }
     const placeFound = await Place.findOne({ address });
     // vérifier si la place existe dans la BDD, si non -> l'ajouter, si oui -> vérifier que l'accès soit le même ou update
