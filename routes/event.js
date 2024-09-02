@@ -86,14 +86,22 @@ router.post("/event/create", isHostChecked, fileUpload(), async (req, res) => {
     }
     const picturesTab = [];
     if (currentPictures) {
-      currentPictures.map((picture) => {
-        picturesTab.push(picture);
-      });
+      if (Array.isArray(currentPictures)) {
+        currentPictures.map((picture) => {
+          picturesTab.push(picture);
+        });
+      } else {
+        picturesTab.push(currentPictures);
+      }
     }
     if (previousPictures) {
-      previousPictures.map((picture) => {
-        picturesTab.push(picture);
-      });
+      if (Array.isArray(currentPictures)) {
+        previousPictures.map((picture) => {
+          picturesTab.push(picture);
+        });
+      } else {
+        picturesTab.push(previousPictures);
+      }
     }
     const addressTab = address.split(", ");
     const city = addressTab[addressTab.length - 2];
