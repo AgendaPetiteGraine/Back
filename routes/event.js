@@ -108,11 +108,10 @@ router.post("/event/create", isHostChecked, fileUpload(), async (req, res) => {
     const addressWithoutSpaces = address.split(" ").join("+");
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${addressWithoutSpaces}&key=${process.env.GOOGLE_API_KEY}
     `;
-
     const response1 = await fetch(url);
     const data = await response1.json();
     const location = {};
-    const count = data.results.length;
+    let count = data.results.length;
     data.results.map((result) => {
       if (result.place_id === place_id) {
         count--;
